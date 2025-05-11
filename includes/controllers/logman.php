@@ -1,25 +1,21 @@
 <?php defined('ABSPATH') or die;
 /**
- * Account Manager
+ * Score Manager and credit gifts
  */
-class AccountMan extends PassKey{
-    /**
-     * 
-     */
+class LogMan extends PassKey{
+    
     protected function __construct() {
         
         parent::__construct();
         
     }
+
     /**
      * @param array $input
      * @return boolean
      */
     public function mainAction($input = array()) {
-        //list accounts
-        $this->view('accounts');
+        $this->view('logs');
         return true;
     }
 }
-
-

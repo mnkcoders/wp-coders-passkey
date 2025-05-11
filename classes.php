@@ -41,27 +41,30 @@ abstract class PassKey{
             case preg_match('/^can_/', $name):
             case preg_match('/^has_/', $name):
                 if( $this->hasContent() ){
-                    return $this->content()->$call(...$arguments);
+                    return $this->content()->$name(...$arguments);
                 }
                 return method_exists($this, $call) ? $this->$call(...$arguments) : false;
             case preg_match('/^get_/', $name):
                 if( $this->hasContent() ){
-                    return $this->content()->$call(...$arguments);
+                    return $this->content()->$name(...$arguments);
                 }
                 return method_exists($this, $call) ? $this->$call(...$arguments) : '';                
             case preg_match('/^count_/', $name):
                 if( $this->hasContent() ){
-                    return $this->content()->$call(...$arguments);
+                    return $this->content()->$name(...$arguments);
                 }
                 return method_exists($this, $call) ? $this->$call(...$arguments) : 0;                
             case preg_match('/^list_/', $name):
                 if( $this->hasContent() ){
-                    return $this->content()->$call(...$arguments);
+                    return $this->content()->$name(...$arguments);
                 }
                 return method_exists($this, $call) ? $this->$call(...$arguments) : array();
             case preg_match('/^link_/', $name):
                 //create a link URL helper with this
                 return $this->link(substr($name, 5), ... $arguments);
+            case preg_match('/^part_/', $name):
+                require $this->part(substr($name, 5));
+                return "<!-- $name -->";
             default:
                 return $this->__action($name,$arguments);
         }
@@ -150,12 +153,24 @@ abstract class PassKey{
         return null;
     }
     /**
+     * @param string $layout
+     * @return boolean
+     */
+    protected function view( $layout = 'default' ){
+        $view = $this->layout($layout, is_admin());
+        if(file_exists($view)){
+            require $view;
+            return true;
+        }
+        return $this->errorAction($layout);
+    }
+    /**
      * @param string $asset
      * @param boolean $admin
      * @return string|path
      */
     protected function asset( $asset , $admin = false){
-        return sprintf('%s/html/%s/%s',self::basepath(),$admin ? 'admin' : 'public', $asset);
+        return sprintf('%shtml/%s/%s',self::basepath(),$admin ? 'admin' : 'public', $asset);
     }
     /**
      * @param string $layout
@@ -163,7 +178,7 @@ abstract class PassKey{
      * @return string|path
      */
     protected function layout( $layout , $admin = false){
-        return sprintf('%s/html/%s/layouts/%s.php',self::basepath(),$admin ? 'admin' : 'public', $layout);
+        return sprintf('%shtml/%s/layouts/%s.php',self::basepath(),$admin ? 'admin' : 'public', $layout);
     }
     /**
      * @param string $part
@@ -171,7 +186,7 @@ abstract class PassKey{
      * @return string|path
      */
     protected function part( $part , $admin = false){
-        return sprintf('%s/html/%s/parts/%s.php',self::basepath(),$admin ? 'admin' : 'public', $part);
+        return sprintf('%shtml/%s/parts/%s.php',self::basepath(),$admin ? 'admin' : 'public', $part);
     }
     /**
      * @param string $path
@@ -339,7 +354,7 @@ abstract class PassKeyContent{
     /**
      * @param array $input
      */
-    protected function __construct( $input = array()) {
+    public function __construct( $input = array()) {
         
         $this->populate($input);
     }

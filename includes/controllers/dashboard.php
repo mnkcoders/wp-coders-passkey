@@ -2,12 +2,11 @@
 /**
  * Account Manager
  */
-class AccountMan extends PassKey{
+class Dashboard extends PassKey{
     /**
      * 
      */
     protected function __construct() {
-        
         parent::__construct();
         
     }
@@ -15,9 +14,8 @@ class AccountMan extends PassKey{
      * @param array $input
      * @return boolean
      */
-    public function mainAction($input = array()) {
-        //list accounts
-        $this->view('accounts');
+    public function mainAction(array $input) {
+        $this->view('dashboard',true);
         return true;
     }
 }

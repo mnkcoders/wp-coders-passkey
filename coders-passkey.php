@@ -73,7 +73,7 @@ function passkey_admin_setup(){
             'manage_options',          // Capability
             'coders_passkey',          // Menu slug
             function(){
-            
+                PassKey::run('Dashboard');
             },// Function callback
             'dashicons-shield-alt',    // Icon
             100                         // Position
@@ -86,7 +86,7 @@ function passkey_admin_setup(){
             'manage_options',
             'coders_passkey_accounts',
             function(){
-            
+                PassKey::run('AccountMan');
             },// Function callback
         );
 
@@ -97,7 +97,7 @@ function passkey_admin_setup(){
             'manage_options',
             'coders_passkey_roles',
             function(){
-            
+                PassKey::run('RoleMan');
             },// Function callback
         );
 
@@ -108,7 +108,7 @@ function passkey_admin_setup(){
             'manage_options',
             'coders_passkey_tiers',
             function(){
-            
+                PassKey::run('TierMan');
             },// Function callback
         );
 
@@ -119,7 +119,7 @@ function passkey_admin_setup(){
             'manage_options',
             'coders_passkey_logs',                
             function(){
-            
+                PassKey::run('LogMan');            
             },// Function callback
         );
 
@@ -130,7 +130,7 @@ function passkey_admin_setup(){
             'manage_options',
             'coders_passkey_settings',                
             function(){
-            
+                PassKey::run('Settings');
             },// Function callback
         );
     });

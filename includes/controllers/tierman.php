@@ -15,7 +15,7 @@ class TierMan extends PassKey{
      * @return boolean
      */
     public function mainAction($input = array()) {
-        var_dump($input);
+        $this->view('tiers');
         return true;
     }
 }

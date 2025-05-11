@@ -6,7 +6,7 @@ class Tier extends PassKeyContent{
     /**
      * @param array $input
      */
-    protected final function __construct($input = array()) {
+    public final function __construct($input = array()) {
         $this->define('id',self::TYPE_TEXT)
                 ->define('title',self::TYPE_TEXT,__('New Tier','coders_passkey'))
                 ->define('roles',self::TYPE_NUMBER,0)

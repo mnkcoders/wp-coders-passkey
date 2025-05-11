@@ -5,9 +5,15 @@
 class RoleMan extends PassKey{
     
     protected function __construct() {
-        
+        $this->preload('Role');
         parent::__construct();
         
+    }
+    /**
+     * @return array
+     */
+    private function listRoles(){
+        return Role::collection();
     }
 
     /**
@@ -15,7 +21,9 @@ class RoleMan extends PassKey{
      * @return boolean
      */
     public function mainAction($input = array()) {
-        var_dump($input);
+        //$this->setContent($this->loadContent('Role'));
+        var_dump($this->list_roles());
+        //$this->view('roles');
         return true;
     }
 }

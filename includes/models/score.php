@@ -9,7 +9,7 @@ class Score extends PassKeyContent{
     /**
      * @param array $input
      */
-    protected final function __construct($input = array()) {
+    public final function __construct($input = array()) {
         $this->define('id',self::TYPE_TEXT)
                 ->define('account',self::TYPE_TEXT)
                 ->define('points',self::TYPE_NUMBER)

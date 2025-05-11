@@ -13,7 +13,7 @@ class Session extends PassKeyContent{
      * 
      * @param array $input
      */
-    protected function __construct($input = array()) {
+    public function __construct($input = array()) {
         $this->define('key',self::TYPE_TEXT)
                 ->define('account',self::TYPE_TEXT)
                 //->define('subscription',self::TYPE_TEXT)

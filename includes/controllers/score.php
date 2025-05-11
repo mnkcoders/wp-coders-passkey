@@ -15,7 +15,7 @@ class Score extends PassKey{
      * @return boolean
      */
     public function mainAction($input = array()) {
-        var_dump($input);
+        $this->view('score');
         return true;
     }
 }

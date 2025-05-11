@@ -9,7 +9,7 @@ class Subscription extends PassKeyContent{
      * 
      * @param array $input
      */
-    protected function __construct($input = array()) {
+    public function __construct($input = array()) {
         $this->define('id',self::TYPE_TEXT,'')
                 ->define('account',self::TYPE_TEXT,'')
                 ->define('tier',self::TYPE_TEXT,'')
