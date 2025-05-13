@@ -37,61 +37,55 @@ abstract class PassKey{
     public function __call( $name , $arguments ){
         $call = lcfirst(str_replace(' ', '', ucwords(str_replace('_', ' ', $name))));
         switch(true){
-            case preg_match('/^is_/', $name):
-            case preg_match('/^can_/', $name):
-            case preg_match('/^has_/', $name):
-                if( $this->hasContent() ){
-                    return $this->content()->$name(...$arguments);
-                }
-                return method_exists($this, $call) ? $this->$call(...$arguments) : false;
-            case preg_match('/^get_/', $name):
-                if( $this->hasContent() ){
-                    return $this->content()->$name(...$arguments);
-                }
-                return method_exists($this, $call) ? $this->$call(...$arguments) : '';                
-            case preg_match('/^count_/', $name):
-                if( $this->hasContent() ){
-                    return $this->content()->$name(...$arguments);
-                }
-                return method_exists($this, $call) ? $this->$call(...$arguments) : 0;                
             case preg_match('/^list_/', $name):
-                if( $this->hasContent() ){
-                    return $this->content()->$name(...$arguments);
-                }
-                return method_exists($this, $call) ? $this->$call(...$arguments) : array();
+                return $this->hasContent() ?
+                    $this->content()->$name(...$arguments) :
+                    ( method_exists($this, $call) ? $this->$call(...$arguments) : array() );
             case preg_match('/^link_/', $name):
                 //create a link URL helper with this
-                return $this->link(substr($name, 5), ... $arguments);
+                return $this->link(
+                        substr($name, 5),
+                        count($arguments ) && is_array($arguments[0]) ? $arguments[0] : array() ,
+                        is_admin() );
             case preg_match('/^part_/', $name):
                 require $this->part(substr($name, 5));
-                return "<!-- $name -->";
+                return sprintf('<!-- PART[%s] -->',$name);
             default:
-                return $this->__action($name,$arguments);
+                //redirect to default model content calls
+                return $this->hasContent() ? $this->content()->$name : '';
         }
-        return '';
     }
     /**
      * @param String $action
-     * @param array $arguments
+     * @param array $inupt
      * @return Boolean
      */
-    protected function __action( $action = 'main', array $arguments  = array()){
+    private function redirect( $action = 'main', array $inupt  = array()){
                 $call = sprintf('%sAction',$action);
                 return method_exists($this,$call) ?
-                        $this->$call( ... $arguments ) :
-                        $this->errorAction($action);        
+                        $this->$call( $inupt ) :
+                        $this->errorAction($action,$inupt);        
     }
     /**
      * @param string $path
      * @param array $get
+     * @param boolean ·$admin
      * @return string|url
      */
-    protected function link( $path = '' , $get = array() ){
+    protected function link( $path = '' , $get = array() , $admin = false ){
+        if($admin){
+            $query = array('page' => strlen($path) ? 'coders_passkey_' . $path : 'coders_passkey');
+            foreach( $get as $var => $val ){
+                $query[$var] = $val;
+            }
+            return add_query_arg($query, admin_url('admin.php'));
+        }
+        
         $query = array();
         foreach ($get as $var => $val ){
             $query[] = sprintf('%s=%s',$var,$val);
         }
-        
+
         return count($query) ?
             $this->url( $path ) . '?' . implode('&', $query) :
             $this->url($path);
@@ -200,7 +194,7 @@ abstract class PassKey{
      * @return string
      */
     public function url($url = ''){
-        return strlen($url) ? sprintf('%s/%s',self::baseurl(),$url) : self::baseurl();
+        return strlen($url) ? self::baseurl() . $url : self::baseurl();
     }
     /**
      * @return \PassKeyContent
@@ -224,6 +218,7 @@ abstract class PassKey{
         }
         return $this;
     }
+    
 
     /**
      * @param array|mixed $input
@@ -231,16 +226,12 @@ abstract class PassKey{
      */
     abstract public function mainAction( array $input );
     /**
-     * @param array|mixed $input
+     * @param string $action
      * @return boolean
      */
-    public function errorAction( $input ){
-        self::log(sprintf('Undefined Action: %s',
-                is_array($input) ?
-                json_encode($input) :
-            $input ),'error');
-
-        var_dump($this->listMessages());
+    public function errorAction( $action ){
+        self::log(sprintf('Undefined Action: %s', $action ),'error');
+        $this->view('error');
         return false;
     }
     /**
@@ -324,7 +315,7 @@ abstract class PassKey{
             if(strlen($module)){
                 $input['context'] = $context;                
             }
-            return $controller->$action($input);
+            return $controller->redirect($action,$input);
         }
         else{
             var_dump(self::$_messages);

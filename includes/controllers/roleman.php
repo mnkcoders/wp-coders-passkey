@@ -12,7 +12,7 @@ class RoleMan extends PassKey{
     /**
      * @return array
      */
-    private function listRoles(){
+    protected function listRoles(){
         return Role::collection();
     }
 
@@ -22,8 +22,7 @@ class RoleMan extends PassKey{
      */
     public function mainAction($input = array()) {
         //$this->setContent($this->loadContent('Role'));
-        var_dump($this->list_roles());
-        //$this->view('roles');
+        $this->view('roles');
         return true;
     }
 }
