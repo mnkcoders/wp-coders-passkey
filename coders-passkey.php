@@ -16,6 +16,7 @@ define('CODERS_PASSKEY_URL', plugin_dir_url(__FILE__));
 require_once sprintf('%s/classes.php',CODERS_PASSKEY_DIR);
 
 add_action('init', function(){
+    //flush_rewrite_rules();
     add_rewrite_rule(
         '^passkey/([a-zA-Z0-9_-]+)/?$',
         'index.php?passkey=$matches[1]',
@@ -46,8 +47,15 @@ add_action('init', function(){
 add_action('template_redirect', function(){
     $request = get_query_var('passkey');
     if (!empty($request)) {
-        $action = explode('-', $request);
-        PassKey::run('user', $action[0] , count($action) > 1 ? $action[1] : '' );
+        $sid = PassKey::importKey();
+        if(strlen($sid)){
+            $action = explode('-', $request);
+            PassKey::run('User', $action[0] , count($action) > 1 ? $action[1] : '' );
+        }
+        else{
+            $action = explode('-', $request);
+            PassKey::run('Login', $action[0] , count($action) > 1 ? $action[1] : '' );            
+        }
         exit;
     }    
 });

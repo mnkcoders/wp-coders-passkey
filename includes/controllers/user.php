@@ -25,19 +25,19 @@ class User extends PassKey{
     }
     /**
      * @param String $action
-     * @param array $arguments
+     * @param array $input
      * @return \Boolean
      */
-    protected function __action($action = 'main', array $arguments = array()) {
+    protected function redirect($action = 'main', array $input = array()) {
         //check the active session from cookie
         if( $this->resumeSession() ){
             //redirect to logedin user content
-            return parent::__action($action, $arguments);
+            return parent::__action($action, $input);
         }
         //capture key if got a link to login
-        if( $action === 'key' && count($arguments) ){
+        if( $action === 'key' && count($input) ){
             //redirect to createsession
-            if( $this->createSession($arguments[0])){
+            if( $this->createSession($input[0])){
                 //redirect to main
                 return $this->mainAction();
             }
@@ -167,12 +167,6 @@ class User extends PassKey{
     private function subscription(){
         return $this->_subscription;
     }
-    /**
-     * @return String
-     */
-    private static function importKey(){
-        return filter_input(INPUT_COOKIE, 'keypass_id') ?? '';
-    }    
 }
 
 

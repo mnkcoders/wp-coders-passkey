@@ -7,6 +7,11 @@ defined('ABSPATH') or die;
  */
 abstract class PassKey{
     /**
+     * 
+     */
+    const KEYPASS_ID = 'keypass_id';
+    
+    /**
      * @var array
      */
     private static $_messages = array();
@@ -47,6 +52,8 @@ abstract class PassKey{
                         substr($name, 5),
                         count($arguments ) && is_array($arguments[0]) ? $arguments[0] : array() ,
                         is_admin() );
+            case preg_match('/^form_/', $name):
+                return $this->form(substr($name, 5),...$arguments);
             case preg_match('/^part_/', $name):
                 require $this->part(substr($name, 5));
                 return sprintf('<!-- PART[%s] -->',$name);
@@ -60,11 +67,34 @@ abstract class PassKey{
      * @param array $inupt
      * @return Boolean
      */
-    private function redirect( $action = 'main', array $inupt  = array()){
+    protected function redirect( $action = 'main', array $inupt  = array()){
                 $call = sprintf('%sAction',$action);
                 return method_exists($this,$call) ?
                         $this->$call( $inupt ) :
                         $this->errorAction($action,$inupt);        
+    }
+    /**
+     * @param string $task
+     * @param array $get
+     * @return string
+     */
+    protected function form($task, array $get = array()) {
+        
+        if(is_admin()){
+            $get['action'] = 'passkey_action';
+            $get['task'] = $task;
+            
+        }
+
+        $query = array();
+        foreach ($get as $var => $val) {
+            $query[] = sprintf('%s=%s', $var, $val);
+        }
+
+        return is_admin() ?
+            admin_url('admin-post.php?' . implode('&', $query)) :
+            sprintf('%s/passkey/%s', get_site_url(),
+                count($query) ? $task . '?' . implode('&', $query) : $task );
     }
     /**
      * @param string $path
@@ -300,20 +330,19 @@ abstract class PassKey{
         //return filter_input_array(INPUT_REQUEST) ?? array();
     }
     /**
-     * @param string $module
+     * @param string $context
      * @param string $action
-     * @param string $module
+     * @param string $id
      * @return Boolean
      */
-    public static function run( $module = 'user' , $action = 'main' , $context = ''){
-        
-        $controller = self::loadController($module);
-        
+    public static function run( $context = 'Session' , $action = 'main' , $id = '' ){
+        $controller = self::loadController($context);
         if( $controller ){
-            //var_dump($action);
+            //var_dump($action);    
             $input = self::request();
-            if(strlen($module)){
-                $input['context'] = $context;                
+            $input['context'] = strtolower( $context );          
+            if(strlen($id)){
+                $input['id'] = $id;
             }
             return $controller->redirect($action,$input);
         }
@@ -323,6 +352,12 @@ abstract class PassKey{
         
         return false;
     }
+    /**
+     * @return String
+     */
+    public static final function importKey(){
+        return filter_input(INPUT_COOKIE, self::KEYPASS_ID) ?? '';
+    }    
 }
 
 /**
