@@ -16,7 +16,7 @@ define('CODERS_PASSKEY_URL', plugin_dir_url(__FILE__));
 require_once sprintf('%s/classes.php',CODERS_PASSKEY_DIR);
 
 add_action('init', function(){
-    //flush_rewrite_rules();
+    flush_rewrite_rules();
     add_rewrite_rule(
         '^passkey/([a-zA-Z0-9_-]+)/?$',
         'index.php?passkey=$matches[1]',
@@ -41,6 +41,15 @@ add_action('init', function(){
     
     if(is_admin()){
         passkey_admin_setup();
+        
+        /*add_action('admin_init', function() {
+
+            $get = filter_input_array(INPUT_GET) ?? array();
+
+            if(passkey_admin_page($get)){
+                exit;
+            }
+        });*/
     }
     
 });
@@ -70,7 +79,27 @@ register_activation_hook(__FILE__, function() {
 register_deactivation_hook(__FILE__, function() {
     flush_rewrite_rules();
 });
-
+/**
+ * @param array $input
+ * @return boolean
+ */
+function passkey_admin_page( array $input ){
+    $pages = array('coders_passkey','coders_passkey_settings');
+    if( isset($input['page']) && in_array($input['page'], $pages) ){
+        $action = isset($input['action']) ? $input['action'] : 'main';
+        $context = isset($input['context']) ? $input['context'] : '';
+        switch($input['page']){
+            case 'coders_passkey':
+                PassKey::run('Dashboard',$action,$context);
+                break;
+            case 'coders_passkey_settings':
+                PassKey::run('Settings',$action,$context);
+                break;
+        }
+        return true;
+    }
+    return false;
+}
 
 function passkey_admin_setup(){
     

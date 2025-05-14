@@ -15,9 +15,19 @@ class Settings extends PassKey{
      * @return boolean
      */
     public function mainAction($input = array()) {
-        
+        //var_dump($this->list_messages());
         $this->view('settings');
         
         return true;
     }
+    /**
+     * @return boolean
+     */
+    public function rewriteAction(){
+        
+        flush_rewrite_rules();
+        parent::log('Rewrite Rules Done','updated');
+        return $this->mainAction();
+    }
 }
+

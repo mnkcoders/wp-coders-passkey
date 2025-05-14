@@ -55,7 +55,7 @@ abstract class PassKey{
             case preg_match('/^form_/', $name):
                 return $this->form(substr($name, 5),...$arguments);
             case preg_match('/^part_/', $name):
-                require $this->part(substr($name, 5));
+                require $this->part(substr($name, 5), is_admin());
                 return sprintf('<!-- PART[%s] -->',$name);
             default:
                 //redirect to default model content calls
@@ -131,11 +131,13 @@ abstract class PassKey{
     /**
      * @param string $controller
      * @param array $input
+     * @param boolean $admin
      * @return \PassKey
      */
-    protected static function loadController( $controller = ''){
-        $path = sprintf('%s/includes/controllers/%s.php',
+    protected static function loadController( $controller = '' , $admin = false ){
+        $path = sprintf('%s/includes/controllers/%s/%s.php',
                 self::basepath(),
+                $admin ? 'admin' : 'public',
                 strtolower($controller));
         if(file_exists($path)){
             require_once $path;
@@ -210,7 +212,10 @@ abstract class PassKey{
      * @return string|path
      */
     protected function part( $part , $admin = false){
-        return sprintf('%shtml/%s/parts/%s.php',self::basepath(),$admin ? 'admin' : 'public', $part);
+        return sprintf('%shtml/%s/parts/%s.php',
+                self::basepath(),
+                $admin ? 'admin' : 'public',
+                $part);
     }
     /**
      * @param string $path
@@ -336,13 +341,16 @@ abstract class PassKey{
      * @return Boolean
      */
     public static function run( $context = 'Session' , $action = 'main' , $id = '' ){
-        $controller = self::loadController($context);
+        $controller = self::loadController($context, is_admin());
         if( $controller ){
             //var_dump($action);    
             $input = self::request();
-            $input['context'] = strtolower( $context );          
+            $input['context'] = strtolower( $context );
             if(strlen($id)){
                 $input['id'] = $id;
+            }
+            if(isset($input['action'])){
+                $action = $input['action'];
             }
             return $controller->redirect($action,$input);
         }
